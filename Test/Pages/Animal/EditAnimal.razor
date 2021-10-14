@@ -1,0 +1,71 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using MatBlazor
+@using Test.Model
+@using System.IO
+@using System.Text;
+@inject Test.Service.AnimalService animalService
+@using BlazorInputFile
+@implements IDisposable
+<div>
+        <MatDialog @bind-IsOpen="@ViewModel.DialogIsOpen" CanBeClosed="false">
+            <EditForm Model="ViewModel.Model" OnValidSubmit="@(() => { SaveItem.InvokeAsync(ViewModel.Model); })">
+                <MatDialogTitle class="diHeader">
+                    <h3>Добавить животное</h3>
+                    <div class="btn-group">
+                        <input type="submit" value="Сохранить" class="btn btn-nav btn-primary mr-1" style="float: right;" />
+                        <span class="btn btn-nav" @onclick="@(e => { ViewModel.DialogIsOpen = false; })">X</span>
+                    </div>
+                    <hr />
+                </MatDialogTitle>
+                <MatDialogContent>
+                    <DataAnnotationsValidator />
+                    <div style="width: 600px;">
+                        <div class="form-group row mb-1">
+                            <label for="ReligionContent" class="col-4 pl-0">Имя</label>
+                            <InputText @bind-Value="@ViewModel.Model.Name" Class="form-control form-control-sm col-8" id="Name"></InputText>
+                            <ValidationMessage For="@(() => ViewModel.Model.Name)" />
+                        </div>
+                        <div class="form-group row mb-1">
+                            <label for="ReligionContent" class="col-4 pl-0">Местоположение</label>
+                            <InputText @bind-Value="@ViewModel.Model.Location" Class="form-control form-control-sm col-8" id="Location"></InputText>
+                            <ValidationMessage For="@(() => ViewModel.Model.Location)" />
+                        </div>
+                        <div class="form-group row mb-1">
+                            <label for="ReligionContent" class="col-4 pl-0">Дата прибытия</label>
+                            <InputDate @bind-Value="@ViewModel.Model.DateOfArrival" Class="form-control form-control-sm col-8" id="DateOfArrival"></InputDate>
+                            <ValidationMessage For="@(() => ViewModel.Model.DateOfArrival)" />
+                        </div>
+                        <div class="form-group row mb-1">
+                            <label for="ReligionContent" class="col-4 pl-0">Опасность?</label>
+                            <InputCheckbox @bind-Value="@ViewModel.Model.Dangerous" Class="form-control form-control-sm col-8" id="Dangerous"></InputCheckbox>
+                            <ValidationMessage For="@(() => ViewModel.Model.Dangerous)" />
+                        </div>
+                        <div class="form-group row mb-1">
+                            <label for="ReligionContent" class="col-4 pl-0">Цвет</label>
+                            <InputText @bind-Value="@ViewModel.Model.Color" Class="form-control form-control-sm col-8" id="Color"></InputText>
+                            <ValidationMessage For="@(() => ViewModel.Model.Color)" />
+                        </div>
+                    </div>
+                </MatDialogContent>
+            </EditForm>
+        </MatDialog>
+    
+
+</div>
+@code {
+    [Parameter]
+    public EditAnimalViewModel ViewModel { get; set; }
+
+    [Parameter]
+    public EventCallback<AnimalViewModel> SaveItem { get; set; }
+
+    [Parameter]
+    public EventCallback<AnimalViewModel> ReloadItem { get; set; }
+    byte[] status;
+
+    public void Dispose()
+    {
+        ViewModel = null;
+        animalService = null;
+    }
+}

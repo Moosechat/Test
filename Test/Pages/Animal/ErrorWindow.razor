@@ -1,0 +1,33 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using MatBlazor
+@using Test.Model
+@using System.IO
+@using System.Text;
+@inject Test.Service.AnimalService animalService
+@using BlazorInputFile
+@implements IDisposable
+<div>
+    <MatDialog @bind-IsOpen="@NewViewModel.DialogIsOpen" CanBeClosed="false">
+            <MatDialogTitle class="diHeader">
+                <h3>Ошибка</h3>
+                <div class="btn-group">
+                    <span class="btn btn-nav" @onclick="@(e => { NewViewModel.DialogIsOpen = false; })">X</span>
+                </div>
+                <hr />
+            </MatDialogTitle>
+            <MatDialogContent>
+                <h3>Concurrency exception.</h3>
+            </MatDialogContent>
+    </MatDialog>
+
+
+</div>
+@code {
+    [Parameter]
+    public ErrorWindowViewModel NewViewModel { get; set; }
+    public void Dispose()
+    {
+        NewViewModel = null;
+        animalService = null;
+    }
+}

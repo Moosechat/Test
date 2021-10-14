@@ -1,0 +1,89 @@
+﻿
+
+@page "/People"
+@inherits PeopleListViewModel
+
+<h2>Люди</h2>
+<div class="d-flex justify-content-between mb-1">
+    <div class="row">
+        <div>
+            <span class="btn btn-primary" @onclick="@CreateItem">Добавить позицию</span>
+            <span class="btn btn-primary" @onclick="@Filtering">Сортировка</span>
+            <span class="btn btn-primary" @onclick="@Reset">Сброс</span>
+            <input type="text" placeholder="Поиск животного" @bind-value="@FValue" />
+        </div>
+    </div>
+    <div class="row">
+        <div>
+            <select @bind="@GetOrderByUserID" class="form-control">
+                <option value="0">Все</option>
+                @foreach (var i in AnimalModel)
+                {
+                    <option value="@i.AnimalId">@i.Name</option>
+                }
+            </select>
+        </div>
+    </div>
+</div>
+<table class="table table-sm col-12">
+    <thead>
+        <tr>
+            <th Column="Id" Title="Id">id</th>
+            <th Column="Name" Title="Name">Name</th>
+            <th Column="Surname" Title="Surname">Surname</th>
+            <th Column="Otchestvo" Title="Otchestvo" style="text-align: center;">Otchestvo</th>
+            <th Column="Date" Title="Date">Date</th>
+            <th Column="Location" Title="Location">Location</th>
+            <th Column="AnimalId" Title="AnimalId">Animal</th>
+            <th Column="Img" Title="Img">Img</th>
+            <th>
+            </th>
+        </tr>
+    </thead>
+    @foreach (var item in Model)
+    {
+<tr>
+    <td>@item.PeopleId</td>
+    <td>@item.Name</td>
+    <td>@item.Surname</td>
+    <td>@item.Otchestvo</td>
+    <td>@item.Date</td>
+    <td>@item.Location</td>
+    @foreach (var i in AnimalModel)
+    {
+        @if (item.AnimalId == i.AnimalId)
+        {
+            <td>@i.Name</td>
+        }
+    }
+    
+<td>
+    <div class="icon">
+        @if (item.Img != null)
+        {
+            <img src="data:image/jpg;base64, @(Convert.ToBase64String(item.Img))" style="width: 350px; height: 300px;" />
+        }
+    </div>
+</td>
+    <td>
+        <span class="btn btn-primary" @onclick="@(() => Edit(item))">Редактировать</span>
+        <span class="btn btn-danger" @onclick="@(() => DeleteItem(item))">Удалить</span>
+    </td>
+</tr>
+    }
+</table>
+@if (currentItem != null && mEditViewModel.DialogIsOpen)
+{
+    <EditPeople ViewModel="@mEditViewModel" ReloadItem="@ReloadItem" SaveItem="@Save" />
+}
+<Test.Shared.InformationDialog ViewModel="@mInformationDialog" Close="@CloseInformationDialog" />
+@if (newEditViewModel.DialogIsOpen)
+{
+    <Test.Pages.Animal.ErrorWindow NewViewModel="@newEditViewModel" />
+}
+<Test.Shared.InformationDialog ViewModel="@mInformationDialog" Close="@CloseInformationDialog" />
+@if (DeleteViewModel.DialogIsOpen)
+{
+    <Test.Pages.People.DeleteItemViewModel ViewModel="@DeleteViewModel" DeleteItem="@DeletePosition" />
+}
+<Test.Shared.InformationDialog ViewModel="@mInformationDialog" Close="@CloseInformationDialog" />

@@ -1,0 +1,32 @@
+﻿@using MatBlazor
+@using Test.Model
+@*@implements IDisposable*@
+<div>
+    <MatDialog @bind-IsOpen="@ViewModel.DialogIsOpen" CanBeClosed="false">
+        <EditForm Model="ViewModel.Model" OnValidSubmit="@(() => { DeleteItem.InvokeAsync(ViewModel.Model); })">
+            <MatDialogTitle class="diHeader">
+                <div class="btn-group" style="right">
+                <h3>Удалить?</h3>
+                </div>
+                
+                <hr />
+            </MatDialogTitle>
+            <MatDialogContent>
+                <div class="btn-group">
+                    <div class="alert-danger" style="left"><input type="submit" value="Удалить" class="btn btn-nav btn-primary mr-1" ;" /></div>
+                    
+                    <span class="btn btn-nav" style="right" @onclick="@(e => { ViewModel.DialogIsOpen = false; })">Отмена</span>
+                </div>
+            </MatDialogContent>
+        </EditForm>
+    </MatDialog>
+
+
+</div>
+@code {
+    [Parameter]
+    public DeleteItemViewModelList ViewModel{ get; set; }
+    [Parameter]
+    public EventCallback<PeopleViewModel> DeleteItem { get; set; }
+
+}

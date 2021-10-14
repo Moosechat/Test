@@ -1,0 +1,72 @@
+﻿@page "/Animal"
+@inherits AnimalListViewModel
+
+<h2>Животные</h2>
+
+
+
+
+<div class="d-flex justify-content-between mb-1">
+    <div class="row">
+    </div>
+    <div class="row">
+        <label class="ml-1" style="padding-top: 2px;">Опасные/Безопасные</label>
+        <input type="checkbox" class="ml-1 pr-1" @bind="@IsDangerous" />
+    </div>
+</div>
+<div class="d-flex justify-content-between mb-1">
+    <div class="row">
+        <div>
+            <span class="btn btn-primary" @onclick="@Reset">Сброс фильтра</span>
+        </div>
+    </div>
+</div>
+<div class="d-flex justify-content-between mb-1">
+    <div class="row">
+        <div>
+            <span class="btn btn-primary" @onclick="@CreateItem">Добавить позицию</span>
+        </div>
+    </div>
+</div>
+<table class="table table-sm col-12">
+    <thead>
+        <tr>
+            <th Column="Id" Title="Id">id</th>
+            <th Column="Name" Title="Name">Name</th>
+            <th Column="Location" Title="Location">Location</th>
+            <th Column="DateOfArrival" Title="DateOfArrival" style="text-align: center;">DateOfArrival</th>
+            <th Column="Dangerous" Title="Dangerous">Dangerous</th>
+            <th Column="Color" Title="Color">Color</th>
+            <th>
+            </th>
+        </tr>
+    </thead>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.AnimalId</td>
+            <td>@item.Name</td>
+            <td>@item.Location</td>
+            <td>@item.DateOfArrival</td>
+            <td>@item.Dangerous</td>
+            <td>@item.Color</td>
+            <td>
+                <span class="btn btn-primary" @onclick="@(() => Edit(item))">Редактировать</span>
+                <span class="btn btn-danger" @onclick="@(() => DeletePosition(item))">Удалить</span>
+
+            </td>
+        </tr>
+
+    }
+</table>
+
+@if (currentItem != null && mEditViewModel.DialogIsOpen)
+{
+    <EditAnimal ViewModel="@mEditViewModel" ReloadItem="@ReloadItem" SaveItem="@Save" />
+}
+<Test.Shared.InformationDialog ViewModel="@mInformationDialog" Close="@CloseInformationDialog" />
+@if (newEditViewModel.DialogIsOpen)
+{
+    <Test.Pages.Animal.ErrorWindow NewViewModel="@newEditViewModel"  />
+}
+<Test.Shared.InformationDialog ViewModel="@newInformationDialog" Close="@CloseInformationDialog" />

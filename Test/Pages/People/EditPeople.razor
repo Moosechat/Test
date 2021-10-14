@@ -1,0 +1,205 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using MatBlazor
+@using Test.Model
+@using System.IO
+@using System.Text;
+@inject Test.Service.AnimalService animalService
+@inject Test.Service.PeopleService peopleService
+@using BlazorInputFile
+@implements IDisposable
+<div>
+    <MatDialog @bind-IsOpen="@ViewModel.DialogIsOpen" CanBeClosed="false">
+        <EditForm Model="ViewModel.Model" OnValidSubmit="@(() => { SaveItem.InvokeAsync(ViewModel.Model); })">
+            <MatDialogTitle class="diHeader">
+                <h3>Добавить животное</h3>
+                <div class="btn-group">
+                    <input type="submit" value="Сохранить" class="btn btn-nav btn-primary mr-1" style="float: right;" />
+                    <span class="btn btn-nav" @onclick="@(e => { ViewModel.DialogIsOpen = false; })">X</span>
+                </div>
+                <hr />
+            </MatDialogTitle>
+            <MatDialogContent>
+                <DataAnnotationsValidator />
+                <div style="width: 600px;">
+                    <div class="form-group row mb-1">
+                        <label for="ReligionContent" class="col-4 pl-0">Имя</label>
+                        <InputText @bind-Value="@ViewModel.Model.Name" Class="form-control form-control-sm col-8" id="Name"></InputText>
+                        <ValidationMessage For="@(() => ViewModel.Model.Name)" />
+                    </div>
+                    <div class="form-group row mb-1">
+                        <label for="ReligionContent" class="col-4 pl-0">Фамилия</label>
+                        <InputText @bind-Value="@ViewModel.Model.Surname" Class="form-control form-control-sm col-8" id="Surname"></InputText>
+                        <ValidationMessage For="@(() => ViewModel.Model.Surname)" />
+                    </div>
+                    <div class="form-group row mb-1">
+                        <label for="ReligionContent" class="col-4 pl-0">Отчество</label>
+                        <InputText @bind-Value="@ViewModel.Model.Otchestvo" Class="form-control form-control-sm col-8" id="Otchestvo"></InputText>
+                        <ValidationMessage For="@(() => ViewModel.Model.Otchestvo)" />
+                    </div>
+                    <div class="form-group row mb-1">
+                        <label for="ReligionContent" class="col-4 pl-0">Дата</label>
+                        <InputDate @bind-Value="@ViewModel.Model.Date" Class="form-control form-control-sm col-8" id="Date"></InputDate>
+                        <ValidationMessage For="@(() => ViewModel.Model.Date)" />
+                    </div>
+                    <div class="form-group row mb-1">
+                        <label for="ReligionContent" class="col-4 pl-0">Местоположение</label>
+                        <InputText @bind-Value="@ViewModel.Model.Location" Class="form-control form-control-sm col-8" id="Location"></InputText>
+                        <ValidationMessage For="@(() => ViewModel.Model.Location)" />
+                    </div>
+                    <div class="form-group row mb-1">
+                        <label for="ReligionContent" class="col-4 pl-0">Животное</label>
+                        <InputSelect @bind-Value="@ViewModel.Model.animalIdToString" Class="form-control form-control-sm col-8" id="AnimalId">
+                            @foreach (var i in AnimalModel)
+                            {
+                                <option value="@i.AnimalId.ToString()">@i.Name</option>
+                            }
+                        </InputSelect>
+
+                        <ValidationMessage For="@(() => ViewModel.Model.AnimalId)" />
+                    </div>
+                    <div class="form-group row mb-1">
+                        <label>Фото</label>
+                        <BlazorInputFile.InputFile OnChange="HandleFileSelected" Class="form-control form-control-sm col-8" id="Description" style="height: 37px;"></BlazorInputFile.InputFile>
+
+                    </div>
+                    <div class="form-group row mb-1">
+                        <label>Фото</label>
+                        <Microsoft.AspNetCore.Components.Forms.InputFile OnChange="@LoadFiles" Class="form-control form-control-sm col-8" id="Description" style="height: 37px;"></Microsoft.AspNetCore.Components.Forms.InputFile>
+                        <ValidationMessage For="@(() => ViewModel.Model.Img)" />
+
+                    </div>
+                    <div class="form-group row mb-1">
+                        <label for="uploadFiles">Фото</label>
+                        <BlazorInputFile.InputFile id="uploadFiles" OnChange="HandleSelection" />
+
+                        @if (selectedFiles != null)
+                        {
+                            foreach (var file in selectedFiles)
+                            {
+                                var isLoading = file.Data.Position > 0;
+
+                                <div class="file-row">
+                                    <!-- File info -->
+                                    <div>
+                                        <strong>@file.Name</strong>
+                                        Size: <strong>@file.Size bytes</strong>;
+                                        Last modified: <strong>@file.LastModified.ToShortDateString()</strong>;
+                                        Type: <strong>@file.Type</strong>
+                                        Relative Path: <strong>@file.RelativePath</strong>
+                                    </div>
+
+                                    <!-- Upload button -->
+                                    <button @onclick="() => LoadFile(file)" disabled="@isLoading">
+                                        @if (!isLoading)
+                                        {
+                                            <span>Сохранить фото</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Loaded @((100.0 * file.Data.Position / file.Size).ToString("0"))%</span>
+                                        }
+                                    </button>
+                                </div>
+                            }
+                        }
+
+                    </div>
+                    </div>
+</MatDialogContent>
+        </EditForm>
+    </MatDialog>
+
+
+</div>
+@code {
+        [Parameter]
+        public EditPeopleViewModel ViewModel { get; set; }
+        [Parameter]
+        public List<AnimalViewModel> AnimalModel { get; set; } = new List<AnimalViewModel>();
+        [Parameter]
+        public EventCallback<PeopleViewModel> SaveItem { get; set; }
+
+        [Parameter]
+        public EventCallback<PeopleViewModel> ReloadItem { get; set; }
+        byte[] status;
+
+        async Task HandleFileSelected(IFileListEntry[] files)
+        {
+            file = files.FirstOrDefault();
+            if (file != null)
+            {
+                var ms = await file.ReadAllAsync();
+                var byteRes = new byte[file.Size];
+                await ms.ReadAsync(byteRes, 0, (int)file.Size);
+                await Task.CompletedTask;
+                ViewModel.Model.Img = byteRes;
+            }
+        }
+
+    protected async override void OnParametersSet()
+    {
+        AnimalModel = await animalService.Get();
+        base.OnParametersSet();
+
+    }
+    private Dictionary<IBrowserFile, string> loadedFiles =
+        new Dictionary<IBrowserFile, string>();
+    private long maxFileSize = 1024 * 15;
+    private int maxAllowedFiles = 3;
+    private bool isLoading;
+    private bool isFull = false;
+    string exceptionMessage;
+    async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        isLoading = true;
+        isFull = false;
+        exceptionMessage = string.Empty;
+
+        try
+        {
+            foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+            {
+                using var reader =
+                    new StreamReader(file.OpenReadStream(maxFileSize));
+
+                loadedFiles.Add(file, await reader.ReadToEndAsync());
+                isFull = true;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (Exception ex)
+        {
+            exceptionMessage = ex.Message;
+        }
+
+        isLoading = false;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ViewModel = null;
+        peopleService = null;
+    }
+    IFileListEntry file;
+
+
+
+
+    IFileListEntry[] selectedFiles;
+
+    void HandleSelection(IFileListEntry[] files)
+    {
+        selectedFiles = files;
+    }
+
+    async Task LoadFile(IFileListEntry file)
+    {
+
+        file.OnDataRead += (sender, eventArgs) => InvokeAsync(StateHasChanged);
+
+        var ms = new MemoryStream();
+        await file.Data.CopyToAsync(ms);
+    }
+}
